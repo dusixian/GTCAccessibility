@@ -121,7 +121,7 @@ Rules:
           }
         } else {
           // If safe, build navigation instruction
-          let details = [];
+          const details = [];
           
           // Add obstacle information
           if (jsonResponse.obstacles && jsonResponse.obstacles.length > 0) {
