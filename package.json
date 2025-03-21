@@ -12,6 +12,7 @@
     "@ai-sdk/openai-compatible": "^0.1.17",
     "@radix-ui/react-slot": "^1.1.2",
     "ai": "^4.1.66",
+    "axios": "^1.8.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^3.0.0",

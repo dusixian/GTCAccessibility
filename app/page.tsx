@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { analyzeImage } from "@/lib/api"
 
 export default function BlindAssistant() {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -81,26 +82,48 @@ export default function BlindAssistant() {
         async (blob) => {
           if (blob) {
             try {
-              // Simulate image analysis (replace with actual API call)
-              const result =
-                "This is a simulated environment description. In a real app, this would be the result of image analysis."
+              // Convert blob to base64
+              const reader = new FileReader()
+              reader.readAsDataURL(blob)
+              reader.onloadend = async () => {
+                try {
+                  const base64data = reader.result as string
+                  // Remove data URL prefix (e.g., "data:image/jpeg;base64,")
+                  const base64Image = base64data.split(',')[1]
+                  
+                  // Call NVIDIA API for image analysis
+                  const result = await analyzeImage(base64Image)
 
-              // Update feedback with analysis results
-              setFeedback(result)
+                  // Update feedback with analysis results
+                  setFeedback(result)
 
-              // Provide audio feedback for blind users
-              speakFeedback(result)
-            } catch (analysisError) {
-              console.error("Error in image analysis:", analysisError)
-              setFeedback("Error analyzing the environment. Please try again.")
+                  // Provide audio feedback for blind users
+                  speakFeedback(result)
+                } catch (error) {
+                  console.error("Error in image analysis:", error)
+                  const errorMessage = error instanceof Error ? error.message : "环境分析出错，请重试"
+                  setFeedback(errorMessage)
+                  speakFeedback(errorMessage)
+                } finally {
+                  setIsProcessing(false)
+                }
+              }
+            } catch (error) {
+              console.error("Error processing image:", error)
+              const errorMessage = "图像处理出错，请重试"
+              setFeedback(errorMessage)
+              speakFeedback(errorMessage)
+              setIsProcessing(false)
             }
           } else {
-            setFeedback("Could not capture image from camera.")
+            const errorMessage = "无法从相机捕获图像"
+            setFeedback(errorMessage)
+            speakFeedback(errorMessage)
+            setIsProcessing(false)
           }
-          setIsProcessing(false)
         },
         "image/jpeg",
-        0.8,
+        0.8
       )
     } catch (error) {
       console.error("Error processing frame:", error)
